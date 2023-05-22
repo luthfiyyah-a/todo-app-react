@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import TodoForm from "./TodoForm"
 import { v4 as uuidv4 } from "uuid";
 import Todo from "./Todo";
@@ -6,7 +6,16 @@ import EditTodoForm from "./EditTodoForm";
 uuidv4();
 
 export default function TodoWrapper(){
-    const [todos, setTodos] = useState([]);
+    const [todos, setTodos] = useState(() => {
+        const storedTodos = localStorage.getItem("todos");
+        return storedTodos ? JSON.parse(storedTodos) : [];
+      });
+
+    // set local storage
+    useEffect(() => {
+        // Menyimpan data todos ke Local Storage setiap kali terjadi perubahan pada todos
+        localStorage.setItem("todos", JSON.stringify(todos));
+    }, [todos]);
 
     const addTodo = todo => {
         setTodos([...todos, {id: uuidv4(), task:todo, completed: false, isEditing: false}]);
@@ -30,6 +39,7 @@ export default function TodoWrapper(){
         setTodos(todos.map(todo => todo.id === id ? {
             ...todo, task, isEditing: !todo.isEditing} : todo ))
     }
+
     return(
         <div className="TodoWrapper">
             <h1>To Do List</h1>
